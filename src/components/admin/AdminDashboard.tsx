@@ -73,6 +73,7 @@ export function AdminDashboard({
 
   // Simple Creation Modals State
   const [showCreateModal, setShowCreateModal] = useState<AdminTab | null>(null);
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
   const [formFields, setFormFields] = useState<any>({});
 
   const sectionId = section?.id || 'sec_bsit11';
@@ -251,7 +252,7 @@ export function AdminDashboard({
             <span>Import JSON</span>
           </button>
           <button
-            onClick={onResetData}
+            onClick={() => setShowResetConfirmModal(true)}
             className="px-3 py-1.5 text-xs font-medium text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-50 rounded-lg transition-colors flex items-center gap-1.5"
             title="Reset database to initial seed data"
           >
@@ -387,29 +388,35 @@ export function AdminDashboard({
               <span>Create Announcement</span>
             </button>
           </div>
-          <div className="divide-y divide-neutral-100">
-            {announcements.map((a) => (
-              <div key={a.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-neutral-900">{a.title}</span>
-                    <PriorityIndicator priority={a.priority} />
+          {announcements.length === 0 ? (
+            <div className="py-8 text-center text-xs text-neutral-400">
+              No announcements published yet. Click "Create Announcement" above or use Import JSON.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {announcements.map((a) => (
+                <div key={a.id} className="py-3 flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-neutral-900">{a.title}</span>
+                      <PriorityIndicator priority={a.priority} />
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{a.content}</p>
                   </div>
-                  <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{a.content}</p>
+                  <button
+                    onClick={async () => {
+                      await databaseRepository.deleteAnnouncement(a.id);
+                      showToast('Deleted', 'Announcement removed from database.', 'info');
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
+                    title="Delete announcement"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    await databaseRepository.deleteAnnouncement(a.id);
-                    showToast('Deleted', 'Announcement removed from database.', 'info');
-                  }}
-                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
-                  title="Delete announcement"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -426,31 +433,37 @@ export function AdminDashboard({
               <span>Create Assignment</span>
             </button>
           </div>
-          <div className="divide-y divide-neutral-100">
-            {assignments.map((asg) => (
-              <div key={asg.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-neutral-500 uppercase">{asg.subject}</span>
-                    <span className="text-neutral-300">·</span>
-                    <span className="text-xs font-bold text-neutral-900">{asg.title}</span>
-                    <PriorityIndicator priority={asg.priority} />
+          {assignments.length === 0 ? (
+            <div className="py-8 text-center text-xs text-neutral-400">
+              No assignments recorded yet. Click "Create Assignment" above or use Import JSON.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {assignments.map((asg) => (
+                <div key={asg.id} className="py-3 flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-neutral-500 uppercase">{asg.subject}</span>
+                      <span className="text-neutral-300">·</span>
+                      <span className="text-xs font-bold text-neutral-900">{asg.title}</span>
+                      <PriorityIndicator priority={asg.priority} />
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{asg.description}</p>
                   </div>
-                  <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{asg.description}</p>
+                  <button
+                    onClick={async () => {
+                      await databaseRepository.deleteAssignment(asg.id);
+                      showToast('Deleted', 'Assignment removed from database.', 'info');
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
+                    title="Delete assignment"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    await databaseRepository.deleteAssignment(asg.id);
-                    showToast('Deleted', 'Assignment removed from database.', 'info');
-                  }}
-                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
-                  title="Delete assignment"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -467,30 +480,36 @@ export function AdminDashboard({
               <span>Create Task</span>
             </button>
           </div>
-          <div className="divide-y divide-neutral-100">
-            {tasks.map((t) => (
-              <div key={t.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-neutral-900">{t.title}</span>
-                    <PriorityIndicator priority={t.priority} />
+          {tasks.length === 0 ? (
+            <div className="py-8 text-center text-xs text-neutral-400">
+              No tasks recorded yet. Click "Create Task" above or use Import JSON.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {tasks.map((t) => (
+                <div key={t.id} className="py-3 flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-neutral-900">{t.title}</span>
+                      <PriorityIndicator priority={t.priority} />
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">
+                      {t.assigned_to ? `Assigned: ${t.assigned_to} · ` : ''}{t.description}
+                    </p>
                   </div>
-                  <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">
-                    {t.assigned_to ? `Assigned: ${t.assigned_to} · ` : ''}{t.description}
-                  </p>
+                  <button
+                    onClick={async () => {
+                      await databaseRepository.deleteTask(t.id);
+                      showToast('Deleted', 'Task removed from database.', 'info');
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    await databaseRepository.deleteTask(t.id);
-                    showToast('Deleted', 'Task removed from database.', 'info');
-                  }}
-                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -507,28 +526,34 @@ export function AdminDashboard({
               <span>Add Note</span>
             </button>
           </div>
-          <div className="divide-y divide-neutral-100">
-            {notes.map((n) => (
-              <div key={n.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-neutral-500">{n.subject}</span>
-                    <span className="text-xs font-bold text-neutral-900">{n.title}</span>
+          {notes.length === 0 ? (
+            <div className="py-8 text-center text-xs text-neutral-400">
+              No notes or study reviewers published yet. Click "Add Note" above.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {notes.map((n) => (
+                <div key={n.id} className="py-3 flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-neutral-500">{n.subject}</span>
+                      <span className="text-xs font-bold text-neutral-900">{n.title}</span>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{n.content}</p>
                   </div>
-                  <p className="text-xs text-neutral-500 mt-0.5 line-clamp-1">{n.content}</p>
+                  <button
+                    onClick={async () => {
+                      await databaseRepository.deleteNote(n.id);
+                      showToast('Deleted', 'Note removed from database.', 'info');
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    await databaseRepository.deleteNote(n.id);
-                    showToast('Deleted', 'Note removed from database.', 'info');
-                  }}
-                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -545,27 +570,33 @@ export function AdminDashboard({
               <span>Add Event</span>
             </button>
           </div>
-          <div className="divide-y divide-neutral-100">
-            {events.map((e) => (
-              <div key={e.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <span className="text-xs font-bold text-neutral-900">{e.title}</span>
-                  <p className="text-xs text-neutral-500 mt-0.5">
-                    {formatEventDateTime(e.starts_at, e.ends_at)} {e.location ? `· ${e.location}` : ''}
-                  </p>
+          {events.length === 0 ? (
+            <div className="py-8 text-center text-xs text-neutral-400">
+              No events or quizzes scheduled yet. Click "Add Event" above.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {events.map((e) => (
+                <div key={e.id} className="py-3 flex items-start justify-between gap-4">
+                  <div>
+                    <span className="text-xs font-bold text-neutral-900">{e.title}</span>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      {formatEventDateTime(e.starts_at, e.ends_at)} {e.location ? `· ${e.location}` : ''}
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await databaseRepository.deleteEvent(e.id);
+                      showToast('Deleted', 'Event removed from database.', 'info');
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    await databaseRepository.deleteEvent(e.id);
-                    showToast('Deleted', 'Event removed from database.', 'info');
-                  }}
-                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -582,27 +613,34 @@ export function AdminDashboard({
               <span>Add Resource</span>
             </button>
           </div>
-          <div className="divide-y divide-neutral-100">
-            {resources.map((r) => (
-              <div key={r.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <span className="text-xs font-bold text-neutral-900">{r.title}</span>
-                  <p className="text-xs font-mono text-neutral-400 mt-0.5 truncate max-w-sm">{r.url}</p>
+          {resources.length === 0 ? (
+            <div className="py-8 text-center text-xs text-neutral-400">
+              No resources or shared drive links saved yet. Click "Add Resource" above.
+            </div>
+          ) : (
+            <div className="divide-y divide-neutral-100">
+              {resources.map((r) => (
+                <div key={r.id} className="py-3 flex items-start justify-between gap-4">
+                  <div>
+                    <span className="text-xs font-bold text-neutral-900">{r.title}</span>
+                    <p className="text-xs font-mono text-neutral-400 mt-0.5 truncate max-w-sm">{r.url}</p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await databaseRepository.deleteResource(r.id);
+                      showToast('Deleted', 'Resource removed from database.', 'info');
+                    }}
+                    className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <button
-                  onClick={async () => {
-                    await databaseRepository.deleteResource(r.id);
-                    showToast('Deleted', 'Resource removed from database.', 'info');
-                  }}
-                  className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
+
 
       {/* VIEW: MEMBERS */}
       {activeAdminTab === 'members' && (
@@ -759,6 +797,43 @@ export function AdminDashboard({
                 className="px-4 py-1.5 text-xs font-semibold bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors"
               >
                 Publish to Section
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* IN-APP RESET CONFIRMATION MODAL */}
+      {showResetConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-neutral-200 overflow-hidden flex flex-col p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-neutral-900">Reset Section Data?</h3>
+                <p className="text-xs text-neutral-500 mt-0.5">
+                  This will clear all local records in localStorage and restore the empty BSIT 1-1 section state.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
+              <button
+                onClick={() => setShowResetConfirmModal(false)}
+                className="px-3.5 py-1.5 text-xs font-medium text-neutral-600 hover:text-neutral-900 rounded-lg hover:bg-neutral-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowResetConfirmModal(false);
+                  onResetData();
+                }}
+                className="px-4 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors"
+              >
+                Reset Data
               </button>
             </div>
           </div>

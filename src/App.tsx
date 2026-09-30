@@ -79,10 +79,8 @@ function MainContent() {
   };
 
   const handleResetData = async () => {
-    if (window.confirm('Reset all section data to initial sample records? Any newly imported or edited items will be restored.')) {
-      await resetAllData();
-      showToast('Demo Data Reset', 'Section records restored to initial state.', 'info');
-    }
+    await resetAllData();
+    showToast('Section Data Cleared', 'Section records reset to initial state.', 'info');
   };
 
   if (loading) {
