@@ -33,7 +33,7 @@ import {
   ImportItem, 
   ValidatedItemResult 
 } from '@/types/importSchema';
-import { databaseRepository } from '@/lib/database/mockStore';
+import { databaseRepository } from '@/lib/database/supabaseStore';
 import { useToast } from '../common/Toast';
 import { calculateDeadlineInfo, formatEventDateTime } from '@/utils/dates';
 import { PriorityIndicator } from '../common/PriorityIndicator';

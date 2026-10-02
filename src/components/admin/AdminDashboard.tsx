@@ -27,7 +27,7 @@ import {
   PriorityLevel 
 } from '@/types/database';
 import { ImportDataView } from './ImportDataView';
-import { databaseRepository } from '@/lib/database/mockStore';
+import { databaseRepository } from '@/lib/database/supabaseStore';
 import { useToast } from '../common/Toast';
 import { PriorityIndicator } from '../common/PriorityIndicator';
 import { formatPublishedDate, calculateDeadlineInfo, formatEventDateTime } from '@/utils/dates';
@@ -254,10 +254,10 @@ export function AdminDashboard({
           <button
             onClick={() => setShowResetConfirmModal(true)}
             className="px-3 py-1.5 text-xs font-medium text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-50 rounded-lg transition-colors flex items-center gap-1.5"
-            title="Reset database to initial seed data"
+            title="Clear this device's old local cache and reload from the shared database"
           >
             <RotateCcw className="w-3.5 h-3.5 text-neutral-400" />
-            <span>Reset Demo Data</span>
+            <span>Refresh Data</span>
           </button>
         </div>
       </div>
@@ -812,9 +812,9 @@ export function AdminDashboard({
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-neutral-900">Reset Section Data?</h3>
+                <h3 className="text-sm font-bold text-neutral-900">Refresh from database?</h3>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  This will clear all local records in localStorage and restore the empty BSIT 1-1 section state.
+                  This clears the old browser-only cache on this device and reloads from the shared database. Shared records are not deleted.
                 </p>
               </div>
             </div>
@@ -833,7 +833,7 @@ export function AdminDashboard({
                 }}
                 className="px-4 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors"
               >
-                Reset Data
+                Refresh
               </button>
             </div>
           </div>

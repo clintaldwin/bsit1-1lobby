@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { databaseRepository } from '@/lib/database/mockStore';
+import { databaseRepository } from '@/lib/database/supabaseStore';
 import { 
   Section, 
   Member, 
