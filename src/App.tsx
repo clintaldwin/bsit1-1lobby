@@ -104,8 +104,12 @@ function MainContent() {
   };
 
   const handleResetData = async () => {
-    await resetAllData();
-    showToast('Section Data Cleared', 'Section records reset to initial state.', 'info');
+    try {
+      await resetAllData();
+      showToast('Shared Data Deleted', 'All shared section content was deleted from Supabase.', 'success');
+    } catch (err: any) {
+      showToast('Delete Failed', err?.message || 'Could not delete the shared section content.', 'error');
+    }
   };
 
   if (loading) {
