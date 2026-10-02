@@ -8,7 +8,6 @@ import {
   Calendar, 
   FolderGit2, 
   Users, 
-  RotateCcw,
   Plus,
   Trash2,
   Edit2,
@@ -253,11 +252,11 @@ export function AdminDashboard({
           </button>
           <button
             onClick={() => setShowResetConfirmModal(true)}
-            className="px-3 py-1.5 text-xs font-medium text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-50 rounded-lg transition-colors flex items-center gap-1.5"
-            title="Clear this device's old local cache and reload from the shared database"
+            className="px-3 py-1.5 text-xs font-medium text-rose-700 bg-white border border-rose-200 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-1.5"
+            title="Delete all shared content for this section from Supabase"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-neutral-400" />
-            <span>Refresh Data</span>
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete Shared Data</span>
           </button>
         </div>
       </div>
@@ -812,9 +811,9 @@ export function AdminDashboard({
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-neutral-900">Refresh from database?</h3>
+                <h3 className="text-sm font-bold text-neutral-900">Delete all shared data?</h3>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  This clears the old browser-only cache on this device and reloads from the shared database. Shared records are not deleted.
+                  This permanently deletes all announcements, assignments, tasks, notes, events, and resources for this section from Supabase. The section and member accounts remain. This cannot be undone.
                 </p>
               </div>
             </div>
@@ -833,7 +832,7 @@ export function AdminDashboard({
                 }}
                 className="px-4 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors"
               >
-                Refresh
+                Delete all shared data
               </button>
             </div>
           </div>
