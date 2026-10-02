@@ -94,8 +94,6 @@ export function useSectionData() {
       setLoading(true);
       await databaseRepository.resetToDefault();
       await refreshData();
-    } catch (err: any) {
-      setError('Failed to reset section database.');
     } finally {
       setLoading(false);
     }
