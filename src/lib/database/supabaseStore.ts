@@ -35,6 +35,15 @@ type ContentTable =
   | 'notes'
   | 'events'
   | 'resources';
+const CONTENT_TABLES: ContentTable[] = [
+  'announcements',
+  'assignments',
+  'tasks',
+  'notes',
+  'events',
+  'resources',
+];
+
 type Table = ContentTable | 'members' | 'sections';
 
 const TABLE_BY_TYPE: Record<EntityType, ContentTable> = {
@@ -145,11 +154,26 @@ class SupabaseSectionStore implements SectionRepository {
     };
   }
 
-  /**
-   * The shared database is never wiped from the client. This only drops the
-   * old browser-only cache from Phase 1 and reloads from Supabase.
-   */
+  /** Delete this section's shared content; Supabase RLS enforces admin access. */
   public async resetToDefault(): Promise<void> {
+    const section = await this.getSection();
+    let deletedCount = 0;
+
+    for (const table of CONTENT_TABLES) {
+      const { data, error } = await supabase
+        .from(table)
+        .delete()
+        .eq('section_id', section.id)
+        .select('id');
+
+      if (error) {
+        const progress = deletedCount ? ` after deleting ${deletedCount} records` : '';
+        throw new Error(`Failed to delete shared ${table} data${progress}: ${error.message}`);
+      }
+
+      deletedCount += data?.length ?? 0;
+    }
+
     try {
       LEGACY_LOCAL_KEYS.forEach((key) => window.localStorage.removeItem(key));
     } catch {
