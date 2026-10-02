@@ -18,6 +18,7 @@ import { CalendarView } from './components/calendar/CalendarView';
 import { NotesView } from './components/notes/NotesView';
 import { ResourcesView } from './components/resources/ResourcesView';
 import { AdminDashboard } from './components/admin/AdminDashboard';
+import { AdminAccessModal } from './components/admin/AdminAccessModal';
 import { EntityType } from './types/database';
 
 function MainContent() {
@@ -40,7 +41,9 @@ function MainContent() {
   const { showToast } = useToast();
 
   const [activeTab, setActiveTab] = useState<NavTab>('lobby');
+  // isAdminMode is only ever set after the server confirms the admin access code.
   const [isAdminMode, setIsAdminMode] = useState<boolean>(false);
+  const [isAdminAccessOpen, setIsAdminAccessOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
 
   // Detail Modal State
@@ -66,16 +69,38 @@ function MainContent() {
     setDetailModalState((prev) => ({ ...prev, isOpen: false }));
   };
 
+  const exitAdminMode = () => {
+    setIsAdminMode(false);
+    setActiveTab('lobby');
+  };
+
+  // Single entry point for tab changes. The admin tab can never be activated
+  // directly; it must go through server-side verification first.
+  const navigateToTab = (tab: NavTab) => {
+    if (tab === 'admin') {
+      if (!isAdminMode) {
+        setIsAdminAccessOpen(true);
+      }
+      return;
+    }
+    if (isAdminMode) setIsAdminMode(false);
+    setActiveTab(tab);
+  };
+
   const handleToggleAdminMode = () => {
     if (isAdminMode) {
-      setIsAdminMode(false);
-      setActiveTab('lobby');
+      exitAdminMode();
       showToast('Switched to Student View', 'Viewing Section Lobby as a class member.', 'info');
     } else {
-      setIsAdminMode(true);
-      setActiveTab('admin');
-      showToast('Administrator Console', 'Logged in with Section Admin privileges.', 'info');
+      setIsAdminAccessOpen(true);
     }
+  };
+
+  const handleAdminVerified = () => {
+    setIsAdminAccessOpen(false);
+    setIsAdminMode(true);
+    setActiveTab('admin');
+    showToast('Administrator Console', 'Logged in with Section Admin privileges.', 'info');
   };
 
   const handleResetData = async () => {
@@ -118,11 +143,7 @@ function MainContent() {
       <Navbar
         section={section}
         activeTab={activeTab}
-        onTabChange={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'admin') setIsAdminMode(true);
-          else if (isAdminMode) setIsAdminMode(false);
-        }}
+        onTabChange={navigateToTab}
         isAdminMode={isAdminMode}
         onToggleAdminMode={handleToggleAdminMode}
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -130,7 +151,7 @@ function MainContent() {
 
       {/* Main Viewport Container (Desktop baseline 1200px) */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6">
-        {isAdminMode || activeTab === 'admin' ? (
+        {isAdminMode && activeTab === 'admin' ? (
           <AdminDashboard
             section={section}
             announcements={announcements}
@@ -141,10 +162,7 @@ function MainContent() {
             resources={resources}
             members={members}
             onResetData={handleResetData}
-            onNavigateToLobby={() => {
-              setIsAdminMode(false);
-              setActiveTab('lobby');
-            }}
+            onNavigateToLobby={exitAdminMode}
           />
         ) : activeTab === 'lobby' ? (
           <LobbyView
@@ -161,7 +179,7 @@ function MainContent() {
             onSelectNote={(note) => handleOpenDetail('note', note)}
             onToggleTaskStatus={updateTaskStatus}
             onToggleAssignmentStatus={updateAssignmentStatus}
-            onNavigateToTab={(tab) => setActiveTab(tab)}
+            onNavigateToTab={navigateToTab}
           />
         ) : activeTab === 'assignments' ? (
           <AssignmentsView
@@ -215,6 +233,13 @@ function MainContent() {
         item={detailModalState.item}
         onUpdateTaskStatus={updateTaskStatus}
         onUpdateAssignmentStatus={updateAssignmentStatus}
+      />
+
+      {/* Admin Access Verification (server-side) */}
+      <AdminAccessModal
+        isOpen={isAdminAccessOpen}
+        onClose={() => setIsAdminAccessOpen(false)}
+        onSuccess={handleAdminVerified}
       />
 
     </div>
