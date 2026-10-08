@@ -104,10 +104,17 @@ class SupabaseSectionStore implements SectionRepository {
     return data as T;
   }
 
-  private async deleteOne(table: Table, id: string): Promise<void> {
-    const { data, error } = await supabase.from(table).delete().eq('id', id).select('id');
+  private async deleteOne(table: ContentTable, id: string, sectionId: string): Promise<void> {
+    const { count, error } = await supabase
+      .from(table)
+      .delete({ count: 'exact' })
+      .eq('id', id)
+      .eq('section_id', sectionId);
     if (error) fail(`Failed to delete ${table} record`, error);
-    if (!data || data.length === 0) throw new Error(`Failed to delete ${table} record: ${PERMISSION_HINT}`);
+    if (count === null || count === undefined) {
+      throw new Error(`Failed to verify deletion from ${table}: Supabase did not return an affected row count.`);
+    }
+    if (count === 0) throw new Error(`Failed to delete ${table} record: ${PERMISSION_HINT}`);
     this.notify();
   }
 
@@ -158,6 +165,43 @@ class SupabaseSectionStore implements SectionRepository {
     this.notify();
   }
 
+  public async resetSectionContent(sectionId: string): Promise<void> {
+    const contentTables: ContentTable[] = [
+      'announcements',
+      'assignments',
+      'tasks',
+      'notes',
+      'events',
+      'resources',
+    ];
+
+    for (const table of contentTables) {
+      const { count, error } = await supabase
+        .from(table)
+        .delete({ count: 'exact' })
+        .eq('section_id', sectionId);
+
+      if (error) fail(`Failed to reset ${table}`, error);
+      if (count === null || count === undefined) {
+        throw new Error(`Failed to verify reset of ${table}: Supabase did not return an affected row count.`);
+      }
+    }
+
+    for (const table of contentTables) {
+      const { count, error } = await supabase
+        .from(table)
+        .select('id', { count: 'exact', head: true })
+        .eq('section_id', sectionId);
+
+      if (error) fail(`Failed to verify reset of ${table}`, error);
+      if (count === null || count === undefined || count > 0) {
+        throw new Error(`Reset verification failed for ${table}: section content rows remain.`);
+      }
+    }
+
+    this.notify();
+  }
+
   // ---------- section ----------
 
   public async getSection(): Promise<Section> {
@@ -197,8 +241,8 @@ class SupabaseSectionStore implements SectionRepository {
     await this.updateAnnouncement(id, { status: 'archived' });
   }
 
-  public deleteAnnouncement(id: string) {
-    return this.deleteOne('announcements', id);
+  public deleteAnnouncement(id: string, sectionId: string) {
+    return this.deleteOne('announcements', id, sectionId);
   }
 
   // ---------- assignments ----------
@@ -222,8 +266,8 @@ class SupabaseSectionStore implements SectionRepository {
     await this.updateAssignment(id, { status: 'archived' });
   }
 
-  public deleteAssignment(id: string) {
-    return this.deleteOne('assignments', id);
+  public deleteAssignment(id: string, sectionId: string) {
+    return this.deleteOne('assignments', id, sectionId);
   }
 
   // ---------- tasks ----------
@@ -250,8 +294,8 @@ class SupabaseSectionStore implements SectionRepository {
     await this.updateTask(id, { status: 'archived' });
   }
 
-  public deleteTask(id: string) {
-    return this.deleteOne('tasks', id);
+  public deleteTask(id: string, sectionId: string) {
+    return this.deleteOne('tasks', id, sectionId);
   }
 
   // ---------- notes ----------
@@ -273,8 +317,8 @@ class SupabaseSectionStore implements SectionRepository {
     await this.updateNote(id, { status: 'archived' });
   }
 
-  public deleteNote(id: string) {
-    return this.deleteOne('notes', id);
+  public deleteNote(id: string, sectionId: string) {
+    return this.deleteOne('notes', id, sectionId);
   }
 
   // ---------- events (table has no updated_at column) ----------
@@ -296,8 +340,8 @@ class SupabaseSectionStore implements SectionRepository {
     await this.updateEvent(id, { status: 'cancelled' });
   }
 
-  public deleteEvent(id: string) {
-    return this.deleteOne('events', id);
+  public deleteEvent(id: string, sectionId: string) {
+    return this.deleteOne('events', id, sectionId);
   }
 
   // ---------- resources ----------
@@ -321,8 +365,8 @@ class SupabaseSectionStore implements SectionRepository {
     await this.updateResource(id, { status: 'archived' });
   }
 
-  public deleteResource(id: string) {
-    return this.deleteOne('resources', id);
+  public deleteResource(id: string, sectionId: string) {
+    return this.deleteOne('resources', id, sectionId);
   }
 
   // ---------- members (RLS: admins and the member themself only) ----------

@@ -33,6 +33,7 @@ function MainContent() {
     members,
     loading,
     error,
+    refreshData,
     updateTaskStatus,
     updateAssignmentStatus,
     resetAllData,
@@ -104,8 +105,8 @@ function MainContent() {
   };
 
   const handleResetData = async () => {
-    await resetAllData();
-    showToast('Section Data Cleared', 'Section records reset to initial state.', 'info');
+    if (!section?.id) throw new Error('The current section could not be identified.');
+    await resetAllData(section.id);
   };
 
   if (loading) {
@@ -162,6 +163,7 @@ function MainContent() {
             resources={resources}
             members={members}
             onResetData={handleResetData}
+            onRefreshData={refreshData}
             onNavigateToLobby={exitAdminMode}
           />
         ) : activeTab === 'lobby' ? (

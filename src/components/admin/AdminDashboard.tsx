@@ -8,7 +8,6 @@ import {
   Calendar, 
   FolderGit2, 
   Users, 
-  RotateCcw,
   Plus,
   Trash2,
   Edit2,
@@ -52,7 +51,8 @@ interface AdminDashboardProps {
   events: Event[];
   resources: Resource[];
   members: Member[];
-  onResetData: () => void;
+  onResetData: () => Promise<void>;
+  onRefreshData: () => Promise<void>;
   onNavigateToLobby: () => void;
 }
 
@@ -66,6 +66,7 @@ export function AdminDashboard({
   resources,
   members,
   onResetData,
+  onRefreshData,
   onNavigateToLobby,
 }: AdminDashboardProps) {
   const { showToast } = useToast();
@@ -74,6 +75,7 @@ export function AdminDashboard({
   // Simple Creation Modals State
   const [showCreateModal, setShowCreateModal] = useState<AdminTab | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
+  const [isResettingContent, setIsResettingContent] = useState(false);
   const [formFields, setFormFields] = useState<any>({});
 
   const sectionId = section?.id || 'sec_bsit11';
@@ -83,6 +85,32 @@ export function AdminDashboard({
   const pendingTasks = tasks.filter((t) => t.status !== 'completed');
   const upcomingEvents = events.filter((e) => e.status !== 'cancelled');
   const activeAnnouncements = announcements.filter((a) => a.status === 'published');
+
+  const handleDelete = async (itemType: string, deleteItem: () => Promise<void>) => {
+    if (!window.confirm(`Permanently delete this ${itemType}?`)) return;
+
+    try {
+      await deleteItem();
+      await onRefreshData();
+      showToast('Deleted', `${itemType} deleted from the database.`, 'success');
+    } catch (err: any) {
+      await onRefreshData();
+      showToast('Delete Failed', err?.message || `Could not delete ${itemType}.`, 'error');
+    }
+  };
+
+  const handleResetSectionContent = async () => {
+    setIsResettingContent(true);
+    setShowResetConfirmModal(false);
+    try {
+      await onResetData();
+      showToast('Reset Complete', 'All content for this section was deleted and verified.', 'success');
+    } catch (err: any) {
+      showToast('Reset Failed', err?.message || 'Section content could not be fully reset.', 'error');
+    } finally {
+      setIsResettingContent(false);
+    }
+  };
 
   const tabs: { id: AdminTab; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'overview', label: 'Overview', icon: CheckSquare },
@@ -254,11 +282,12 @@ export function AdminDashboard({
           </button>
           <button
             onClick={() => setShowResetConfirmModal(true)}
+            disabled={isResettingContent}
             className="px-3 py-1.5 text-xs font-medium text-neutral-600 bg-white border border-neutral-300 hover:bg-neutral-50 rounded-lg transition-colors flex items-center gap-1.5"
-            title="Clear this device's old local cache and reload from the shared database"
+            title="Delete all content records for this section"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-neutral-400" />
-            <span>Refresh Data</span>
+            <Trash2 className="w-3.5 h-3.5 text-rose-500" />
+            <span>Reset All Content</span>
           </button>
         </div>
       </div>
@@ -406,8 +435,7 @@ export function AdminDashboard({
                   </div>
                   <button
                     onClick={async () => {
-                      await databaseRepository.deleteAnnouncement(a.id);
-                      showToast('Deleted', 'Announcement removed from database.', 'info');
+                      await handleDelete('announcement', () => databaseRepository.deleteAnnouncement(a.id, a.section_id));
                     }}
                     className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
                     title="Delete announcement"
@@ -453,8 +481,7 @@ export function AdminDashboard({
                   </div>
                   <button
                     onClick={async () => {
-                      await databaseRepository.deleteAssignment(asg.id);
-                      showToast('Deleted', 'Assignment removed from database.', 'info');
+                      await handleDelete('assignment', () => databaseRepository.deleteAssignment(asg.id, asg.section_id));
                     }}
                     className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
                     title="Delete assignment"
@@ -500,8 +527,7 @@ export function AdminDashboard({
                   </div>
                   <button
                     onClick={async () => {
-                      await databaseRepository.deleteTask(t.id);
-                      showToast('Deleted', 'Task removed from database.', 'info');
+                      await handleDelete('task', () => databaseRepository.deleteTask(t.id, t.section_id));
                     }}
                     className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
                   >
@@ -544,8 +570,7 @@ export function AdminDashboard({
                   </div>
                   <button
                     onClick={async () => {
-                      await databaseRepository.deleteNote(n.id);
-                      showToast('Deleted', 'Note removed from database.', 'info');
+                      await handleDelete('note', () => databaseRepository.deleteNote(n.id, n.section_id));
                     }}
                     className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
                   >
@@ -587,8 +612,7 @@ export function AdminDashboard({
                   </div>
                   <button
                     onClick={async () => {
-                      await databaseRepository.deleteEvent(e.id);
-                      showToast('Deleted', 'Event removed from database.', 'info');
+                      await handleDelete('event', () => databaseRepository.deleteEvent(e.id, e.section_id));
                     }}
                     className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
                   >
@@ -628,8 +652,7 @@ export function AdminDashboard({
                   </div>
                   <button
                     onClick={async () => {
-                      await databaseRepository.deleteResource(r.id);
-                      showToast('Deleted', 'Resource removed from database.', 'info');
+                      await handleDelete('resource', () => databaseRepository.deleteResource(r.id, r.section_id));
                     }}
                     className="p-1.5 text-neutral-400 hover:text-rose-600 transition-colors"
                   >
@@ -815,9 +838,9 @@ export function AdminDashboard({
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-neutral-900">Refresh from database?</h3>
+                <h3 className="text-sm font-bold text-neutral-900">Reset all section content?</h3>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  This clears the old browser-only cache on this device and reloads from the shared database. Shared records are not deleted.
+                  This permanently deletes all announcements, assignments, tasks, notes, events, and resources for {section?.code || 'this section'}. Members, access credentials, and other sections will remain.
                 </p>
               </div>
             </div>
@@ -830,13 +853,11 @@ export function AdminDashboard({
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  setShowResetConfirmModal(false);
-                  onResetData();
-                }}
-                className="px-4 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white rounded-lg transition-colors"
+                onClick={handleResetSectionContent}
+                disabled={isResettingContent}
+                className="px-4 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-700 disabled:bg-rose-300 text-white rounded-lg transition-colors"
               >
-                Refresh
+                {isResettingContent ? 'Resetting…' : 'Reset All'}
               </button>
             </div>
           </div>

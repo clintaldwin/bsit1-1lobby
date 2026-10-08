@@ -89,13 +89,17 @@ export function useSectionData() {
     }
   }, []);
 
-  const resetAllData = useCallback(async () => {
+  const resetAllData = useCallback(async (sectionId: string) => {
     try {
       setLoading(true);
-      await databaseRepository.resetToDefault();
+      if (!databaseRepository.resetSectionContent) {
+        throw new Error('The configured repository does not support section content reset.');
+      }
+      await databaseRepository.resetSectionContent(sectionId);
       await refreshData();
     } catch (err: any) {
-      setError('Failed to reset section database.');
+      await refreshData();
+      throw err;
     } finally {
       setLoading(false);
     }
