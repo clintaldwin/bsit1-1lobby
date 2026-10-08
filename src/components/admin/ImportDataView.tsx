@@ -450,6 +450,13 @@ export function ImportDataView({ sectionId, onImportSuccess }: ImportDataViewPro
                       {data.description || data.content || 'No details provided.'}
                     </p>
 
+                    {itemResult.itemType === 'note' && data.url && (
+                      <div className="mt-2 flex items-center gap-1 text-[11px] text-blue-600 font-medium">
+                        <FileText className="w-3 h-3 text-blue-500 shrink-0" />
+                        <span>Source Material</span>
+                      </div>
+                    )}
+
                     {/* Dates & Location */}
                     <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 mt-2 font-mono">
                       {deadline && (
@@ -560,6 +567,26 @@ export function ImportDataView({ sectionId, onImportSuccess }: ImportDataViewPro
                         data: { ...editFormData.data, subject: e.target.value },
                       })
                     }
+                    className="w-full text-xs p-2.5 rounded-lg border border-neutral-300 outline-hidden focus:border-neutral-900"
+                  />
+                </div>
+              )}
+
+              {editFormData.type === 'note' && (
+                <div>
+                  <label className="text-xs font-semibold text-neutral-700 block mb-1">
+                    Source Material URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={editFormData.data.url || ''}
+                    onChange={(e) =>
+                      setEditFormData({
+                        ...editFormData,
+                        data: { ...editFormData.data, url: e.target.value },
+                      })
+                    }
+                    placeholder="https://drive.google.com/..."
                     className="w-full text-xs p-2.5 rounded-lg border border-neutral-300 outline-hidden focus:border-neutral-900"
                   />
                 </div>

@@ -183,6 +183,7 @@ export function AdminDashboard({
             title: formFields.title,
             content: formFields.content,
             author: formFields.author || 'Section Admin',
+            url: formFields.url ? formFields.url.trim() : undefined,
             status: 'published',
           });
           break;
@@ -759,9 +760,11 @@ export function AdminDashboard({
                 </>
               )}
 
-              {showCreateModal === 'resources' && (
+              {(showCreateModal === 'resources' || showCreateModal === 'notes') && (
                 <div>
-                  <label className="text-xs font-semibold text-neutral-700 block mb-1">URL Link</label>
+                  <label className="text-xs font-semibold text-neutral-700 block mb-1">
+                    {showCreateModal === 'notes' ? 'Source Material URL (Optional)' : 'URL Link'}
+                  </label>
                   <input
                     type="url"
                     placeholder="https://drive.google.com/..."

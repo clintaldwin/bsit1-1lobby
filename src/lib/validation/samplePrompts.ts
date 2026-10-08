@@ -76,6 +76,13 @@ You MUST format your output strictly as a JSON object adhering to Version 1.0 sc
   ]
 }
 
+NOTES AND STUDY MATERIALS RULES:
+- A study material, reviewer, module, lecture summary, or cheat sheet remains a "note" even when it has a URL.
+- Do NOT convert a linked study note into a resource merely because it has a URL. Resources are for generic standalone tools, repositories, or external websites.
+- Preserve a provided Google Drive URL exactly in note.data.url.
+- Omit the url field when no URL is provided.
+- Never fabricate a URL, use null, or use placeholder URLs.
+
 Only output valid, raw JSON. Do not surround with markdown backticks or commentary.`;
 
 export const SAMPLE_BATCH_BSIT_11 = JSON.stringify(

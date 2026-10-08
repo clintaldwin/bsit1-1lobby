@@ -157,7 +157,7 @@ export function ItemDetailModal({
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white text-xs font-medium rounded-lg hover:bg-neutral-800 transition-colors"
               >
-                <span>Open Resource Link</span>
+                <span>{isNote ? 'Open Source Material' : 'Open Resource Link'}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>

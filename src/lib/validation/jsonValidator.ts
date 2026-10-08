@@ -215,6 +215,7 @@ export function transformImportItemToEntity(
         title: item.data.title,
         content: item.data.content,
         author: item.data.author || createdBy,
+        url: item.data.url,
         status: 'published',
         source_text: item.source_text,
         created_at: now,
