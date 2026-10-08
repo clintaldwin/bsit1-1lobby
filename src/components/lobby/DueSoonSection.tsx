@@ -70,27 +70,23 @@ export function DueSoonSection({
     .sort((a, b) => a.deadline.diffHours - b.deadline.diffHours);
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-5 sm:p-6 shadow-xs">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
       
       {/* Header with segmented filter buttons */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-sm font-semibold tracking-tight text-neutral-900 uppercase">
-            Due Soon & Deliverables
-          </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Ranked by impending deadline
-          </p>
+          <h2 className="text-base font-semibold tracking-tight text-slate-900">Assignments & tasks</h2>
+          <p className="mt-1 text-xs text-slate-500">Upcoming deadlines, nearest first</p>
         </div>
 
         {/* Filter buttons */}
-        <div className="flex items-center gap-1 p-1 bg-neutral-100 rounded-lg self-start sm:self-auto">
+        <div className="flex max-w-full items-center gap-1 self-start overflow-x-auto rounded-lg bg-slate-100 p-1 sm:self-auto">
           <button
             onClick={() => setFilterType('all')}
             className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
               filterType === 'all'
-                ? 'bg-white text-neutral-950 shadow-xs'
-                : 'text-neutral-600 hover:text-neutral-950'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             All Items ({pendingAssignments.length + pendingTasks.length})
@@ -99,8 +95,8 @@ export function DueSoonSection({
             onClick={() => setFilterType('assignments')}
             className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
               filterType === 'assignments'
-                ? 'bg-white text-neutral-950 shadow-xs'
-                : 'text-neutral-600 hover:text-neutral-950'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Assignments ({pendingAssignments.length})
@@ -109,8 +105,8 @@ export function DueSoonSection({
             onClick={() => setFilterType('tasks')}
             className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${
               filterType === 'tasks'
-                ? 'bg-white text-neutral-950 shadow-xs'
-                : 'text-neutral-600 hover:text-neutral-950'
+                ? 'bg-white text-slate-900 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Tasks ({pendingTasks.length})
@@ -122,10 +118,10 @@ export function DueSoonSection({
       {allItems.length === 0 ? (
         <EmptyState
           title="No pending deadlines"
-          description="Your section has submitted all current assignments and tasks."
+          description="There are no open assignments or tasks to show right now."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="divide-y divide-slate-100">
           {allItems.slice(0, 5).map((item) => {
             const isAssignment = item.itemType === 'assignment';
             const dl = item.deadline;
@@ -133,13 +129,13 @@ export function DueSoonSection({
             return (
               <div
                 key={`${item.itemType}_${item.id}`}
-                className="group p-3.5 rounded-xl border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50/50 transition-all flex items-start gap-3.5"
+                className="group -mx-1 flex items-start gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-slate-50"
               >
                 {/* Checkbox for tasks, or Icon for assignments */}
                 {isAssignment ? (
                   <button
                     onClick={() => onSelectAssignment(item.original as Assignment)}
-                    className="mt-0.5 w-5 h-5 rounded-md flex items-center justify-center text-neutral-400 group-hover:text-amber-600 transition-colors shrink-0"
+                    className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white hover:text-blue-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     title="View assignment details"
                   >
                     <BookOpen className="w-4 h-4" />
@@ -147,7 +143,7 @@ export function DueSoonSection({
                 ) : (
                   <button
                     onClick={() => onToggleTaskStatus(item.id, 'completed')}
-                    className="mt-0.5 text-neutral-400 hover:text-emerald-600 transition-colors shrink-0"
+                    className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-white hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     title="Mark task completed"
                   >
                     <Circle className="w-4 h-4" />
@@ -156,39 +152,38 @@ export function DueSoonSection({
 
                 {/* Content */}
                 <div 
-                  className="flex-1 min-w-0 cursor-pointer"
+                  className="min-w-0 flex-1 cursor-pointer"
                   onClick={() => {
                     if (isAssignment) onSelectAssignment(item.original as Assignment);
                   }}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-xs font-semibold text-neutral-900 group-hover:text-neutral-700 transition-colors line-clamp-1">
+                    <span className="text-sm font-medium text-slate-900 transition-colors group-hover:text-blue-800 line-clamp-1">
                       {item.title}
                     </span>
                     <PriorityIndicator priority={item.priority} />
                   </div>
 
-                  <p className="text-xs text-neutral-500 line-clamp-1 mt-0.5">
+                  <p className="mt-1 text-xs text-slate-600 line-clamp-1">
                     {item.description}
                   </p>
 
                   {/* Clean unboxed metadata with bullet separators */}
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 mt-2 font-mono tabular-nums">
-                    <span className="font-sans font-medium text-neutral-700">{item.subject}</span>
-                    <span aria-hidden="true">·</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs tabular-nums text-slate-500">
+                    <span className="font-medium text-slate-600">{item.subject}</span>
                     <span
-                      className={`font-sans flex items-center gap-1 ${
+                      className={`flex items-center gap-1.5 ${
                         dl.isOverdue
                           ? 'text-rose-700 font-semibold'
                           : dl.isDueToday
                           ? 'text-amber-700 font-semibold'
                           : dl.isDueTomorrow
                           ? 'text-amber-800 font-medium'
-                          : 'text-neutral-600'
+                          : 'text-slate-600'
                       }`}
                     >
                       {dl.isOverdue && <AlertTriangle className="w-3 h-3 text-rose-600 inline" />}
-                      <Clock className="w-3 h-3 text-neutral-400 inline" />
+                      <Clock className="h-3.5 w-3.5 text-slate-400" />
                       {dl.relativeLabel}
                     </span>
                   </div>
@@ -201,7 +196,7 @@ export function DueSoonSection({
             <div className="pt-2 text-center">
               <button
                 onClick={() => onNavigateToTab(filterType === 'tasks' ? 'tasks' : 'assignments')}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-700 hover:text-neutral-950 transition-colors py-1 px-3 rounded-md hover:bg-neutral-100"
+                className="inline-flex min-h-9 items-center gap-1.5 rounded-lg px-3 py-1 text-xs font-medium text-blue-800 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
               >
                 View all {allItems.length} deliverables
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -211,6 +206,6 @@ export function DueSoonSection({
         </div>
       )}
 
-    </div>
+    </section>
   );
 }

@@ -152,7 +152,7 @@ export function AssignmentsView({
         <EmptyState
           icon={BookOpen}
           title="No assignments yet"
-          description="Your section has no assignments listed. Deliverables will appear here once published or imported."
+          description="Our section has no assignments listed. Deliverables will appear here once published or imported."
         />
       ) : filteredAssignments.length === 0 ? (
         <EmptyState

@@ -106,7 +106,7 @@ export const SAMPLE_BATCH_BSIT_11 = JSON.stringify(
         source_text: "Bring printed copy of lab sheet.",
         data: {
           title: "Submission Requirement for IT 112 Lab",
-          content: "Please ensure your code has comments and includes your section BSIT 1-1 at the top header.",
+          content: "Please ensure your code has comments and includes our section BSIT 1-1 at the top header.",
           priority: "normal"
         }
       },

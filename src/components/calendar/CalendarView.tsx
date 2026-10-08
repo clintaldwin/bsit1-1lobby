@@ -172,7 +172,7 @@ export function CalendarView({
         <EmptyState
           icon={CalendarIcon}
           title="No scheduled items"
-          description="Your section has no events or deadlines on the schedule."
+          description="Our section has no events or deadlines on the schedule."
         />
       ) : viewMode === 'timeline' ? (
         /* Agenda Timeline View */

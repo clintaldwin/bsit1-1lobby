@@ -151,7 +151,15 @@ function MainContent() {
       />
 
       {/* Main Viewport Container (Desktop baseline 1200px) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6">
+      <main
+        className={
+          activeTab === 'lobby' && !isAdminMode
+            ? 'flex-1 w-full'
+            : isAdminMode
+              ? 'flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6'
+              : 'flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 pt-6 pb-20 lg:pb-0'
+        }
+      >
         {isAdminMode && activeTab === 'admin' ? (
           <AdminDashboard
             section={section}

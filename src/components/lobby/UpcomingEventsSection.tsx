@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, ArrowRight } from 'lucide-react';
 import { Event } from '@/types/database';
 import { formatEventDateTime } from '@/utils/dates';
 import { EmptyState } from '../common/EmptyState';
@@ -15,70 +15,77 @@ export function UpcomingEventsSection({
   onSelectEvent,
   onNavigateToCalendar,
 }: UpcomingEventsSectionProps) {
+  const now = Date.now();
   const upcomingEvents = events
-    .filter((e) => e.status !== 'cancelled')
+    .filter((e) => e.status === 'ongoing' || (e.status === 'upcoming' && new Date(e.starts_at).getTime() >= now))
     .sort((a, b) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
 
   return (
-    <div className="bg-white border border-neutral-200 rounded-2xl p-5 sm:p-6 shadow-xs">
-      <div className="flex items-center justify-between mb-4">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold tracking-tight text-neutral-900 uppercase">
-            Upcoming Schedule & Exams
-          </h3>
-          <p className="text-xs text-neutral-500 mt-0.5">
-            Quizzes, defenses, and section activities
-          </p>
+          <h2 className="text-base font-semibold tracking-tight text-slate-900">Upcoming events</h2>
+          <p className="mt-1 text-xs text-slate-500">Exams and section activities</p>
         </div>
         <button
           onClick={onNavigateToCalendar}
-          className="text-xs text-neutral-600 hover:text-neutral-900 font-medium transition-colors"
+          className="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-lg px-2 text-xs font-medium text-blue-800 transition-colors hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
         >
-          View Calendar
+          Calendar <ArrowRight className="h-3.5 w-3.5" />
         </button>
       </div>
 
       {upcomingEvents.length === 0 ? (
         <EmptyState
-          icon={Calendar}
+          icon={CalendarDays}
           title="No upcoming events"
           description="There are no scheduled quizzes or activities on the calendar."
         />
       ) : (
-        <div className="space-y-3">
+        <div className="divide-y divide-slate-100">
           {upcomingEvents.slice(0, 4).map((evt) => (
             <div
               key={evt.id}
               onClick={() => onSelectEvent(evt)}
-              className="p-3.5 rounded-xl border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50/50 transition-all cursor-pointer group flex items-start gap-3"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onSelectEvent(evt);
+                }
+              }}
+              className="-mx-1 flex cursor-pointer items-start gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 group"
             >
-              <div className="p-2 rounded-lg bg-neutral-100 text-neutral-700 shrink-0 group-hover:bg-neutral-200 transition-colors">
-                <Calendar className="w-4 h-4" />
+              <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 text-blue-900">
+                <span className="text-[10px] font-semibold uppercase leading-3">
+                  {new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(evt.starts_at))}
+                </span>
+                <span className="text-base font-semibold leading-5 tabular-nums">
+                  {new Intl.DateTimeFormat('en', { day: 'numeric' }).format(new Date(evt.starts_at))}
+                </span>
               </div>
 
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-semibold text-neutral-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                <h3 className="text-sm font-medium text-slate-900 transition-colors group-hover:text-blue-800 line-clamp-1">
                   {evt.title}
-                </h4>
+                </h3>
                 {evt.description && (
-                  <p className="text-xs text-neutral-500 line-clamp-1 mt-0.5">
+                  <p className="mt-0.5 text-xs text-slate-500 line-clamp-1">
                     {evt.description}
                   </p>
                 )}
 
-                <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500 mt-2 font-mono">
-                  <span className="flex items-center gap-1 text-neutral-700 font-sans">
-                    <Clock className="w-3 h-3 text-neutral-400" />
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-slate-400" />
                     {formatEventDateTime(evt.starts_at, evt.ends_at)}
                   </span>
                   {evt.location && (
-                    <>
-                      <span aria-hidden="true" className="text-neutral-300">·</span>
-                      <span className="flex items-center gap-1 text-neutral-500 font-sans">
-                        <MapPin className="w-3 h-3 text-neutral-400" />
-                        {evt.location}
-                      </span>
-                    </>
+                    <span className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                      {evt.location}
+                    </span>
                   )}
                 </div>
               </div>
@@ -86,6 +93,6 @@ export function UpcomingEventsSection({
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
